@@ -1,0 +1,58 @@
+version "4.0"
+
+class ZRadarHDSpawnHandler : StaticEventHandler
+{
+	override void CheckReplacement(ReplaceEvent e)
+	{
+		if (!e.Replacement)
+		{
+			return;
+		}
+
+		switch (e.Replacement.GetClassName())
+		{
+			case 'HDMap':
+				if (random[zrdhdrand]() <= 64)
+				{
+					e.Replacement = "PortableZRadar";
+				}
+				break;
+		}
+	}
+}
+
+class ZRadarHDHandler : ZRadarMainHandler
+{
+	override void WorldLoaded(WorldEvent e)
+	{
+		DestroyMainHandler();
+	}
+
+	override bool CheckRadarCondition(PlayerPawn plr)
+	{
+		return plr.CheckInventory("PortableZRadar", 1);
+	}
+}
+
+class PortableZRadar : HDPickup
+{
+	Default
+	{
+		-INVENTORY.INVBAR
+		-HDPICKUP.DROPTRANSLATION
+		HDPickup.Bulk 5;
+		Inventory.MaxAmount 1;
+		Inventory.Icon "ZRDRA0";
+		Inventory.PickupMessage "You picked up a portable radar.";
+		Tag "Portable Radar";
+		XScale 0.15;
+		YScale 0.2;
+	}
+
+	States
+	{
+		Spawn:
+			ZRDR AB 6 A_SetTics(random(4, 8));
+			Loop;
+	}
+}
