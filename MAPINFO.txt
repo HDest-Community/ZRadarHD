@@ -1,4 +1,4 @@
 GameInfo
 {
-	AddEventHandlers = "ZRadarMainHandler"
+	AddEventHandlers = "ZRadarHDHandler"
 }
