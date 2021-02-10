@@ -1,7 +1,18 @@
 version "4.0"
 
-class ZRadarHDSpawnHandler : StaticEventHandler
+class ZRadarHDHandler : ZRadarMainHandler
 {
+	override void WorldLoaded(WorldEvent e)
+	{
+		DestroyMainHandler();
+	}
+
+	override bool CheckRadarCondition(PlayerPawn plr)
+	{
+		PortableZRadar Radar = PortableZRadar(plr.FindInventory("PortableZRadar"));
+		return Radar && Radar.WeaponStatus[Radar.ZRProp_Battery] > 0;
+	}
+
 	override void CheckReplacement(ReplaceEvent e)
 	{
 		if (!e.Replacement)
@@ -21,32 +32,100 @@ class ZRadarHDSpawnHandler : StaticEventHandler
 	}
 }
 
-class ZRadarHDHandler : ZRadarMainHandler
+class PortableZRadar : HDWeapon
 {
-	override void WorldLoaded(WorldEvent e)
+	enum ZRProperty
 	{
-		DestroyMainHandler();
+		ZRProp_Flags,
+		ZRProp_UseOffset,
+		ZRProp_Battery,
+		ZRProp_DrainTicker
 	}
 
-	override bool CheckRadarCondition(PlayerPawn plr)
+	action void A_AddOffset(int ofs)
 	{
-		return plr.CheckInventory("PortableZRadar", 1);
+		invoker.WeaponStatus[ZRProp_UseOffset] += ofs;
 	}
-}
 
-class PortableZRadar : HDPickup
-{
+	override string, double GetPickupSprite() { return "ZRDRA0", 0.3; }
+	override string GetHelpText()
+	{
+		string BaseString = WEPHELP_RELOAD.."  Reload battery\n"
+		..WEPHELP_UNLOAD.."  Unload battery";
+		return BaseString;
+	}
+	override double WeaponBulk() { return 8 + (WeaponStatus[ZRProp_Battery] >= 0 ? ENC_BATTERY_LOADED : 0); }
+	override void InitializeWepStats(bool idfa)
+	{
+		WeaponStatus[ZRProp_Battery] = 20;
+	}
+
+	override void DoEffect()
+	{
+		if (!Handler)
+		{
+			Handler = ZRadarHDHandler(EventHandler.Find("ZRadarHDHandler"));
+		}
+
+		int Mode = Handler.GetRadarMode();
+		if (Mode > 0 && WeaponStatus[ZRProp_Battery] > 0)
+		{
+			if (++WeaponStatus[ZRProp_DrainTicker] > 35 * 60 * Handler.GetDrainMult(Mode))
+			{
+				WeaponStatus[ZRProp_Battery]--;
+				WeaponStatus[ZRProp_DrainTicker] = 0;
+			}
+		}
+
+		Super.DoEffect();
+	}
+
+	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
+	{
+		vector2 bob = hpl.hudbob * 0.3;
+		int Offset = WeaponStatus[ZRProp_UseOffset];
+		bob.y += Offset;
+		int BaseYOffset = 0;
+		
+		sb.DrawImage("ZRDRA0", (0, BaseYOffset) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, alpha: 1.0, scale:(2, 2));
+		int Bat = hdw.WeaponStatus[ZRProp_Battery];
+		if (Bat >= 0)
+		{
+			string spr;
+			if (Bat > 13)
+			{
+				spr = "CELLA0";
+			}
+			else if (Bat > 6)
+			{
+				spr = "CELLB0";
+			}
+			else if (Bat > 0)
+			{
+				spr = "CELLC0";
+			}
+			else
+			{
+				spr = "CELLD0";
+			}
+			sb.DrawImage(spr, (0, 40) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, scale: (2.0, 2.0));
+		}
+	}
+
+	ZRadarHDHandler Handler;
+
 	Default
 	{
-		-INVENTORY.INVBAR
-		-HDPICKUP.DROPTRANSLATION
-		HDPickup.Bulk 5;
+		+HDWEAPON.FITSINBACKPACK
+		+INVENTORY.INVBAR
+		+WEAPON.WIMPY_WEAPON
+		-HDWEAPON.DROPTRANSLATION
 		Inventory.MaxAmount 1;
 		Inventory.Icon "ZRDRA0";
+		Inventory.PickupSound "weapons/pocket";
 		Inventory.PickupMessage "You picked up a portable radar.";
 		Tag "Portable Radar";
-		XScale 0.15;
-		YScale 0.2;
+		Scale 0.2;
 	}
 
 	States
@@ -54,5 +133,69 @@ class PortableZRadar : HDPickup
 		Spawn:
 			ZRDR AB 6 A_SetTics(random(4, 8));
 			Loop;
+		Select:
+			TNT1 A 0 A_AddOffset(100);
+			Goto Super::Select;
+		Ready:
+			TNT1 A 1
+			{
+				if (PressingUser3())
+				{
+					A_MagManager("HDBattery");
+					return;
+				}
+
+				int off = invoker.WeaponStatus[ZRProp_UseOffset];
+				if (off > 0)
+				{
+					invoker.WeaponStatus[ZRProp_UseOffset] = off * 2 / 3;
+				}
+
+				A_WeaponReady(WRF_ALL | WRF_NOFIRE);
+			}
+			Goto ReadyEnd;
+		Unload:
+			TNT1 A 20;
+			TNT1 A 5
+			{
+				int Bat = invoker.WeaponStatus[ZRProp_Battery];
+				if (Bat < 0)
+				{
+					return;
+				}
+				if (PressingUnload() || PressingReload())
+				{
+					HDBattery.GiveMag(self, "HDBattery", Bat);
+					A_StartSound("weapons/pocket", 9);
+					A_SetTics(20);
+				}
+				else
+				{
+					HDBattery.SpawnMag(self, "HDBattery", Bat);
+				}
+				invoker.WeaponStatus[ZRProp_Battery] = -1;
+			}
+			Goto ReloadEnd;
+		Reload:
+			TNT1 A 14 A_StartSound("weapons/pocket", 9);
+			TNT1 A 5
+			{
+				if (invoker.WeaponStatus[ZRProp_Battery] >= 0)
+				{
+					return;
+				}
+				let Bat = HDBattery(FindInventory("HDBattery"));
+				if(!Bat)
+				{
+					return;
+				}
+				int Amt = Bat.TakeMag(true);
+				invoker.WeaponStatus[ZRProp_Battery] = Amt;
+				A_StartSound("weapons/vulcopen1", 8, CHANF_OVERLAP);
+			}
+			Goto ReloadEnd;
+		ReloadEnd:
+			TNT1 A 6;
+			Goto ready;
 	}
 }
