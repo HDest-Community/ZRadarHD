@@ -2,6 +2,7 @@
 ---
 - This mod requires [AceCoreLib](https://gitlab.com/accensi/hd-addons/acecorelib).
 - It is recommended to disable base ZRadar's internal battery when using this mod.
+- Loadout code is `zrd`.
 
 ### What does it do?
 ---

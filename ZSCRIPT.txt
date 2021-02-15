@@ -125,6 +125,7 @@ class PortableZRadar : HDWeapon
 		Inventory.PickupSound "weapons/pocket";
 		Inventory.PickupMessage "You picked up a portable radar.";
 		Tag "Portable Radar";
+		HDWeapon.RefId "zrd";
 		Scale 0.2;
 	}
 
