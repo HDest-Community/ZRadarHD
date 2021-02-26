@@ -7,6 +7,21 @@ class ZRadarHDHandler : ZRadarMainHandler
 		DestroyMainHandler();
 	}
 
+	override double GetAlpha()
+	{
+		double OriginalAlpha = Super.GetAlpha();
+		let plr = HDPlayerPawn(players[consoleplayer].mo);
+		if (plr)
+		{
+			let Radar = PortableZRadar(plr.FindInventory('PortableZRadar'));
+			if (Radar)
+			{
+				OriginalAlpha *= max(0.35, Radar.WeaponStatus[Radar.ZRProp_Battery] / 20.0);
+			}
+		}
+		return OriginalAlpha;
+	}
+
 	override bool CheckRadarCondition(PlayerPawn plr)
 	{
 		PortableZRadar Radar = PortableZRadar(plr.FindInventory("PortableZRadar"));
