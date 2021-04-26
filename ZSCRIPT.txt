@@ -62,6 +62,8 @@ class PortableZRadar : HDWeapon
 		invoker.WeaponStatus[ZRProp_UseOffset] += ofs;
 	}
 
+	override bool AddSpareWeapon(actor newowner) { return AddSpareWeaponRegular(newowner); }
+	override HDWeapon GetSpareWeapon(actor newowner , bool reverse, bool doselect) { return GetSpareWeaponRegular(newowner, reverse, doselect); }
 	override string, double GetPickupSprite() { return "ZRDRA0", 0.3; }
 	override string GetHelpText()
 	{
@@ -135,7 +137,7 @@ class PortableZRadar : HDWeapon
 		+INVENTORY.INVBAR
 		+WEAPON.WIMPY_WEAPON
 		-HDWEAPON.DROPTRANSLATION
-		Inventory.MaxAmount 1;
+		Inventory.MaxAmount 5;
 		Inventory.Icon "ZRDRA0";
 		Inventory.PickupSound "weapons/pocket";
 		Inventory.PickupMessage "You picked up a portable radar.";
@@ -147,7 +149,7 @@ class PortableZRadar : HDWeapon
 	States
 	{
 		Spawn:
-			ZRDR AB 6 A_SetTics(random(4, 8));
+			ZRDR BA 6 NoDelay A_SetTics(invoker.WeaponStatus[ZRProp_Battery] == -1 ? -1 : random(4, 8));
 			Loop;
 		Select:
 			TNT1 A 0 A_AddOffset(100);
