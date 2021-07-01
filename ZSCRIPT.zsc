@@ -45,6 +45,15 @@ class ZRadarHDHandler : ZRadarMainHandler
 				break;
 		}
 	}
+
+	override void WorldThingSpawned(WorldEvent e)
+	{
+		let bat = HDBattery(e.Thing);
+		if (bat)
+		{
+			bat.ItemsThatUseThis.Push("PortableZRadar");
+		}
+	}
 }
 
 class PortableZRadar : HDWeapon
