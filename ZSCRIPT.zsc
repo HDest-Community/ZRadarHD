@@ -93,23 +93,17 @@ class PortableZRadar : HDWeapon
 			Handler = ZRadarHDHandler(EventHandler.Find("ZRadarHDHandler"));
 		}
 
-		int Mode = Handler.GetRadarMode();
-		if (Mode > Mode_Disabled && WeaponStatus[ZRProp_Battery] > 0)
+		int mode = Handler.GetRadarMode();
+		if (WeaponStatus[ZRProp_Battery] > 0)
 		{
-			if (!HasToggled)
+			if (mode == Mode_Disabled && level.time % 3 == 0 || mode > Mode_Disabled)
 			{
-				HasToggled = true;
-				WeaponStatus[ZRProp_Battery]--;
+				if (++WeaponStatus[ZRProp_DrainTicker] > 35 * 90 * Handler.GetDrainMult(Mode))
+				{
+					WeaponStatus[ZRProp_Battery]--;
+					WeaponStatus[ZRProp_DrainTicker] = 0;
+				}
 			}
-			if (++WeaponStatus[ZRProp_DrainTicker] > 35 * 60 * Handler.GetDrainMult(Mode))
-			{
-				WeaponStatus[ZRProp_Battery]--;
-				WeaponStatus[ZRProp_DrainTicker] = 0;
-			}
-		}
-		else if (HasToggled && Mode == Mode_Disabled)
-		{
-			HasToggled = false;
 		}
 
 		Super.DoEffect();
