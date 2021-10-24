@@ -96,7 +96,7 @@ class PortableZRadar : HDWeapon
 		int mode = Handler.GetRadarMode();
 		if (WeaponStatus[ZRProp_Battery] > 0)
 		{
-			if (mode == Mode_Disabled && level.time % 3 == 0 || mode > Mode_Disabled)
+			if (mode == Mode_Disabled && level.time % 4 == 0 || mode > Mode_Disabled)
 			{
 				if (++WeaponStatus[ZRProp_DrainTicker] > 35 * 90 * Handler.GetDrainMult(Mode))
 				{
