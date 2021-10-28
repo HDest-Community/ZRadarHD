@@ -1,4 +1,4 @@
-version "4.0"
+version "4.6"
 
 class ZRadarHDHandler : ZRadarMainHandler
 {
@@ -67,81 +67,51 @@ class ZRadarHDHandler : ZRadarMainHandler
 		bool movement = mode == Mode_Movement && (other.vel.length() > 0 || other.target || other.master is 'PlayerPawn');
 		bool local = mode == Mode_Local && plr.CheckSight(other);
 
-		if (full || movement || local)
-		{
-			if (other.bISMONSTER)
-			{
-				if (toggles & 1 && !other.bFRIENDLY)
-				{
-					int SpawnHealth = other.GetSpawnHealth();
-					if (SpawnHealth < 400)
-					{
-						return RadarBlip.Create(plr, other, "REDDOT", "REDBELOW", "REDABOVE");
-					}
-					else if (SpawnHealth < 1000)
-					{
-						return RadarBlip.Create(plr, other, "ORNDOT", "ORNBELOW", "ORNABOVE");
-					}
-					else
-					{
-						return RadarBlip.Create(plr, other, "GLDDOT", "GLDBELOW", "GLDABOVE");
-					}
-				}
-				if (toggles & 1 << 1 && other.bFRIENDLY)
-				{
-					return RadarBlip.Create(plr, other, "CYNDOT", "CYNBELOW", "CYNABOVE");
-				}
-			}
-			if (toggles & 1 << 2 && other is "PlayerPawn")
-			{
-				return RadarBlip.Create(plr, other, "GRNDOT", "GRNBELOW", "GRNABOVE");
-			}
-		}
-		if (full || local)
+		if (full || mode == Mode_Movement || local)
 		{
 			if (toggles & 1 << 3 && (other is 'PortableMedikit' || other is 'HDInjectorMaker' && !(other is 'BluePotion')))
 			{
-				return RadarBlip.Create(plr, other, "REDCROSS", drawBox: (3, 3));
+				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Red, drawBox: (3, 3));
 			}
 			if (toggles & 1 << 4 && other is 'HDArmour')
 			{
-				return RadarBlip.Create(plr, other, "BLUCROSS", drawBox: (4, 4));
+				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Blue, drawBox: (4, 4));
 			}
 			if (toggles & 1 << 5 && (other is 'BluePotion' || other is 'SpiritualArmour' || other is 'HDBlursphere' || other is 'BlueSphere' || other is 'BrownSphere' || other is 'GreenSphere' || other is 'SquadSummoner'))
 			{
-				return RadarBlip.Create(plr, other, "GRNSQARE", drawBox: (4, 4));
+				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Green, drawBox: (4, 4));
 			}
 			if (toggles & 1 << 6 && other is 'Weapon')
 			{
-				return RadarBlip.Create(plr, other, "GLDSTAR");
+				return RadarBlip.Create(plr, other, "BLPSTAR", RadarBlip.Col_Gold);
 			}
 			if (toggles & 1 << 7 && other is 'HDMagAmmo')
 			{
 				let mag = HDMagAmmo(other);
 				if (mag.Mags[mag.Mags.Size() - 1] == mag.MaxPerUnit)
 				{
-					return RadarBlip.Create(plr, other, "TANSQARE", drawBox: (3, 3));
+					return RadarBlip.Create(plr, other, "BLPSQARE", RadarBlip.Col_Tan, drawBox: (3, 3));
 				}
 			}
 			if (toggles & 1 << 8 && other is 'HDAmBox')
 			{
-				return RadarBlip.Create(plr, other, "PNKSQARE", drawBox: (4, 4));
+				return RadarBlip.Create(plr, other, "BLPSTAR", RadarBlip.Col_Tan);
 			}
 			if (toggles & 1 << 9 && other is 'HDBackpack')
 			{
-				return RadarBlip.Create(plr, other, "PNKSTAR");
+				return RadarBlip.Create(plr, other, "BLPSTAR", RadarBlip.Col_Pink);
 			}
 			if (toggles & 1 << 10 && other.GetClass() == 'BFGNecroShard')
 			{
-				return RadarBlip.Create(plr, other, "GRNSTAR");
+				return RadarBlip.Create(plr, other, "BLPSTAR", RadarBlip.Col_Green);
 			}
-			if (toggles & 1 << 11 && other.bCOUNTITEM) // [Ace] There are no HD items that are COUNTITEM so anything that counts towards that tally is from some other source, hence the lack of other checks.
+			if (toggles & 1 << 11 && other.bCOUNTITEM) // [Ace] There are no HD items that are COUNTITEM so anything that counts towards this tally is from some other source, hence the lack of other checks.
 			{
-				return RadarBlip.Create(plr, other, "GLDSQARE", drawBox: (3, 3));
+				return RadarBlip.Create(plr, other, "BLPSQARE", RadarBlip.Col_Red, drawBox: (3, 3));
 			}
 		}
 		
-		return null;
+		return Super.TryMakeBlip(mode, toggles, plr, other);
 	}
 }
 
