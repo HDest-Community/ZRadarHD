@@ -92,7 +92,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 					return RadarBlip.Create(plr, other, "CYNDOT", "CYNBELOW", "CYNABOVE");
 				}
 			}
-			if (toggles & 1 << 2 && other is "PlayerPawn" && (full || movement || local))
+			if (toggles & 1 << 2 && other is "PlayerPawn")
 			{
 				return RadarBlip.Create(plr, other, "GRNDOT", "GRNBELOW", "GRNABOVE");
 			}
