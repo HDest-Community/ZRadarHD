@@ -1,0 +1,13 @@
+[enu default]
+ZRADAR_TOGGLE_1 = "Show Enemies";
+ZRADAR_TOGGLE_2 = "Show Friendlies";
+ZRADAR_TOGGLE_3 = "Show Players";
+ZRADAR_TOGGLE_4 = "Show Supplies";
+ZRADAR_TOGGLE_5 = "Show Armors";
+ZRADAR_TOGGLE_6 = "Show Magic";
+ZRADAR_TOGGLE_7 = "Show Weapons";
+ZRADAR_TOGGLE_8 = "Show Magazines";
+ZRADAR_TOGGLE_9 = "Show Ammo Boxes";
+ZRADAR_TOGGLE_10 = "Show Backpacks";
+ZRADAR_TOGGLE_11 = "Show Frag Shards";
+ZRADAR_TOGGLE_12 = "Show Countables";
