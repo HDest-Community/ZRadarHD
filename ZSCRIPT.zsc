@@ -105,7 +105,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 			}
 			if (toggles & 1 << 4 && other is 'HDArmour')
 			{
-				return RadarBlip.Create(plr, other, "BLUSQARE", drawBox: (4, 4));
+				return RadarBlip.Create(plr, other, "BLUCROSS", drawBox: (4, 4));
 			}
 			if (toggles & 1 << 5 && (other is 'BluePotion' || other is 'SpiritualArmour' || other is 'HDBlursphere' || other is 'BlueSphere' || other is 'BrownSphere' || other is 'GreenSphere' || other is 'SquadSummoner'))
 			{
