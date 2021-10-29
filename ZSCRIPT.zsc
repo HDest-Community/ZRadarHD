@@ -16,7 +16,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 			let Radar = PortableZRadar(plr.FindInventory('PortableZRadar'));
 			if (Radar)
 			{
-				OriginalAlpha *= max(0.35, Radar.WeaponStatus[Radar.ZRProp_Battery] / 20.0);
+				OriginalAlpha *= clamp(Radar.WeaponStatus[Radar.ZRProp_Battery] / 13.0, 0.4, 1.0);
 			}
 		}
 		return OriginalAlpha;
@@ -176,27 +176,10 @@ class PortableZRadar : HDWeapon
 		int BaseYOffset = 0;
 		
 		sb.DrawImage("ZRDRA0", (0, BaseYOffset) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, alpha: 1.0, scale:(2, 2));
-		int Bat = hdw.WeaponStatus[ZRProp_Battery];
-		if (Bat >= 0)
+		int bat = hdw.WeaponStatus[ZRProp_Battery];
+		if (bat >= 0)
 		{
-			string spr;
-			if (Bat > 13)
-			{
-				spr = "CELLA0";
-			}
-			else if (Bat > 6)
-			{
-				spr = "CELLB0";
-			}
-			else if (Bat > 0)
-			{
-				spr = "CELLC0";
-			}
-			else
-			{
-				spr = "CELLD0";
-			}
-			sb.DrawImage(spr, (0, 40) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, scale: (2.0, 2.0));
+			sb.DrawImage(AceCore.GetBatteryColor(bat), (0, 40) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, scale: (2.0, 2.0));
 		}
 	}
 
