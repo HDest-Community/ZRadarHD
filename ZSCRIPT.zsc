@@ -103,7 +103,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 			}
 			if (toggles & 1 << 10 && other.GetClass() == 'BFGNecroShard')
 			{
-				return RadarBlip.Create(plr, other, "BLPSTAR", RadarBlip.Col_Green);
+				return RadarBlip.Create(plr, other, "BLPDOT", RadarBlip.Col_BlueGreen, drawBox: (3, 3));
 			}
 			if (toggles & 1 << 11 && other.bCOUNTITEM) // [Ace] There are no HD items that are COUNTITEM so anything that counts towards this tally is from some other source, hence the lack of other checks.
 			{
