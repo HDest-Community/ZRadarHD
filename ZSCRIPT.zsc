@@ -22,6 +22,18 @@ class ZRadarHDHandler : ZRadarMainHandler
 		return OriginalAlpha;
 	}
 
+	override double GetDrainMult()
+	{
+		double distMult = max(HDCONST_ONEMETRE * 20.0, ScanDistance.GetInt(), OverscanDistance.GetInt() * 0.8) / (HDCONST_ONEMETRE * 20.0);
+		double mult = Super.GetDrainMult() * (AngleLimit.GetInt() / 180.0) * distMult;
+
+		if (RadarMode[consoleplayer] == Mode_Disabled)
+		{
+			mult = min(mult, 0.25);
+		}
+		return mult;
+	}
+
 	override bool CheckRadarCondition(PlayerPawn plr)
 	{
 		PortableZRadar Radar = PortableZRadar(plr.FindInventory("PortableZRadar"));
@@ -152,16 +164,13 @@ class PortableZRadar : HDWeapon
 			Handler = ZRadarHDHandler(EventHandler.Find("ZRadarHDHandler"));
 		}
 
-		int mode = Handler.GetRadarMode();
+		int mode = Handler.RadarMode[owner.PlayerNumber()];
 		if (WeaponStatus[ZRProp_Battery] > 0)
 		{
-			if (mode == Mode_Disabled && level.time % 4 == 0 || mode > Mode_Disabled)
+			if (++WeaponStatus[ZRProp_DrainTicker] > (35 * 90) / Handler.GetDrainMult())
 			{
-				if (++WeaponStatus[ZRProp_DrainTicker] > 35 * 90 * Handler.GetDrainMult(Mode))
-				{
-					WeaponStatus[ZRProp_Battery]--;
-					WeaponStatus[ZRProp_DrainTicker] = 0;
-				}
+				WeaponStatus[ZRProp_Battery]--;
+				WeaponStatus[ZRProp_DrainTicker] = 0;
 			}
 		}
 
