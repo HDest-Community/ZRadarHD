@@ -24,8 +24,14 @@ class ZRadarHDHandler : ZRadarMainHandler
 
 	override double GetDrainMult()
 	{
+
+		int angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
+		if (angleLimit == 0)
+		{
+			angleLimit = players[consoleplayer].FOV;
+		}
 		double distMult = max(HDCONST_ONEMETRE * 20.0, ScanDistance.GetInt(), OverscanDistance.GetInt() * 0.8) / (HDCONST_ONEMETRE * 20.0);
-		double mult = Super.GetDrainMult() * (AngleLimit.GetInt() / 180.0) * distMult;
+		double mult = Super.GetDrainMult() * (angleLimit / 180.0) * distMult;
 
 		if (RadarMode[consoleplayer] == Mode_Disabled)
 		{
