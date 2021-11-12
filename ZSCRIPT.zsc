@@ -25,7 +25,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 	override double GetDrainMult()
 	{
 
-		int angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
+		double angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
 		if (angleLimit == 0)
 		{
 			angleLimit = players[consoleplayer].FOV;
