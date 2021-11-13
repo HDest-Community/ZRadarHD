@@ -5,6 +5,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 	override void WorldLoaded(WorldEvent e)
 	{
 		DestroyMainHandler();
+		Super.WorldLoaded(e);
 	}
 
 	override double GetAlpha()
