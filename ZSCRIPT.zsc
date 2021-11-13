@@ -25,7 +25,6 @@ class ZRadarHDHandler : ZRadarMainHandler
 
 	override double GetDrainMult()
 	{
-
 		double angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
 		if (angleLimit == 0)
 		{
