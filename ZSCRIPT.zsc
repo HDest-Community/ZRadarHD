@@ -35,7 +35,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 
 		if (RadarMode[consoleplayer] == Mode_Disabled)
 		{
-			mult = min(mult, 0.25);
+			mult = min(mult, 0.10);
 		}
 		return mult;
 	}
