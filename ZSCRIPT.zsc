@@ -207,7 +207,6 @@ class PortableZRadar : HDWeapon
 		+INVENTORY.INVBAR
 		+WEAPON.WIMPY_WEAPON
 		-HDWEAPON.DROPTRANSLATION
-		Inventory.MaxAmount 5;
 		Inventory.Icon "ZRDRA0";
 		Inventory.PickupSound "weapons/pocket";
 		Inventory.PickupMessage "You picked up a portable radar.";
