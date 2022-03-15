@@ -214,13 +214,7 @@ class PortableZRadar : HDWeapon
 	States
 	{
 		Spawn:
-			ZRDR A -1 NoDelay
-			{
-				if (invoker.WeaponStatus[ZRProp_Battery] <= 0)
-				{
-					frame++;
-				}
-			}
+			ZRDR B -1;
 			Loop;
 		Select:
 			TNT1 A 0 A_AddOffset(100);
