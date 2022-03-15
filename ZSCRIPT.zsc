@@ -150,7 +150,7 @@ class PortableZRadar : HDWeapon
 
 	override bool AddSpareWeapon(actor newowner) { return AddSpareWeaponRegular(newowner); }
 	override HDWeapon GetSpareWeapon(actor newowner , bool reverse, bool doselect) { return GetSpareWeaponRegular(newowner, reverse, doselect); }
-	override string, double GetPickupSprite() { return "ZRDRA0", 0.3; }
+	override string, double GetPickupSprite() { return WeaponStatus[ZRProp_Battery] > 0 ? "ZRDRA0" : "ZRDRB0", 0.3; }
 	override string GetHelpText()
 	{
 		string BaseString = WEPHELP_RELOAD.."  Reload battery\n"
@@ -190,7 +190,7 @@ class PortableZRadar : HDWeapon
 		bob.y += Offset;
 		int BaseYOffset = 0;
 		
-		sb.DrawImage("ZRDRA0", (0, BaseYOffset) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, alpha: 1.0, scale:(2, 2));
+		sb.DrawImage(GetPickupSprite(), (0, BaseYOffset) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, alpha: 1.0, scale:(2, 2));
 		int bat = hdw.WeaponStatus[ZRProp_Battery];
 		if (bat >= 0)
 		{
@@ -199,7 +199,6 @@ class PortableZRadar : HDWeapon
 	}
 
 	ZRadarHDHandler Handler;
-	private bool HasToggled;
 
 	Default
 	{
@@ -218,7 +217,13 @@ class PortableZRadar : HDWeapon
 	States
 	{
 		Spawn:
-			ZRDR BA 6 NoDelay A_SetTics(invoker.WeaponStatus[ZRProp_Battery] == -1 ? -1 : random(4, 8));
+			ZRDR A -1 NoDelay
+			{
+				if (invoker.WeaponStatus[ZRProp_Battery] <= 0)
+				{
+					frame++;
+				}
+			}
 			Loop;
 		Select:
 			TNT1 A 0 A_AddOffset(100);
@@ -238,7 +243,7 @@ class PortableZRadar : HDWeapon
 					invoker.WeaponStatus[ZRProp_UseOffset] = off * 2 / 3;
 				}
 
-				A_WeaponReady(WRF_ALL | WRF_NOFIRE);
+				A_WeaponReady(WRF_ALL);
 			}
 			Goto ReadyEnd;
 		Unload:
