@@ -23,21 +23,15 @@ class ZRadarHDHandler : ZRadarMainHandler
 		return OriginalAlpha;
 	}
 
-	override double GetDrainMult()
+	override double GetDrainMult(int playerIndex)
 	{
 		double angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
 		if (angleLimit == 0)
 		{
-			angleLimit = players[consoleplayer].FOV;
+			angleLimit = players[playerIndex].FOV;
 		}
 		double distMult = max(HDCONST_ONEMETRE * 20.0, ScanDistance.GetInt(), OverscanDistance.GetInt() * 0.8) / (HDCONST_ONEMETRE * 20.0);
-		double mult = Super.GetDrainMult() * (angleLimit / 180.0) * distMult;
-
-		if (RadarMode[consoleplayer] == Mode_Disabled)
-		{
-			mult = min(mult, 0.10);
-		}
-		return mult;
+		return Super.GetDrainMult(playerIndex) * (angleLimit / 180.0) * distMult;
 	}
 
 	override bool CheckRadarCondition(PlayerPawn plr)
@@ -150,7 +144,10 @@ class PortableZRadar : HDWeapon
 
 	override bool AddSpareWeapon(actor newowner) { return AddSpareWeaponRegular(newowner); }
 	override HDWeapon GetSpareWeapon(actor newowner , bool reverse, bool doselect) { return GetSpareWeaponRegular(newowner, reverse, doselect); }
-	override string, double GetPickupSprite() { return WeaponStatus[ZRProp_Battery] > 0 ? "ZRDRA0" : "ZRDRB0", 0.3; }
+	override string, double GetPickupSprite()
+	{
+		return owner && WeaponStatus[ZRProp_Battery] > 0 && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? "ZRDRA0" : "ZRDRB0", 0.3;
+	}
 	override string GetHelpText()
 	{
 		string BaseString = WEPHELP_RELOAD.."  Reload battery\n"
@@ -163,38 +160,38 @@ class PortableZRadar : HDWeapon
 		WeaponStatus[ZRProp_Battery] = 20;
 	}
 
-	override void DoEffect()
+	override void Tick()
 	{
 		if (!Handler)
 		{
 			Handler = ZRadarHDHandler(EventHandler.Find("ZRadarHDHandler"));
 		}
 
-		int mode = Handler.RadarMode[owner.PlayerNumber()];
+		Icon = TexMan.CheckForTexture(GetPickupSprite(), TexMan.Type_Any);
+
 		if (WeaponStatus[ZRProp_Battery] > 0)
 		{
-			if (++WeaponStatus[ZRProp_DrainTicker] > (35 * 90) / Handler.GetDrainMult())
+			double div = owner && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? min(Handler.GetDrainMult(owner.PlayerNumber()), 0.10) : 0.10;
+			if (++WeaponStatus[ZRProp_DrainTicker] > (35 * 90) / div)
 			{
 				WeaponStatus[ZRProp_Battery]--;
 				WeaponStatus[ZRProp_DrainTicker] = 0;
 			}
 		}
 
-		Super.DoEffect();
+		Super.Tick();
 	}
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
 	{
 		vector2 bob = hpl.hudbob * 0.3;
-		int Offset = WeaponStatus[ZRProp_UseOffset];
-		bob.y += Offset;
-		int BaseYOffset = 0;
+		bob.y += WeaponStatus[ZRProp_UseOffset];
 		
-		sb.DrawImage(GetPickupSprite(), (0, BaseYOffset) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, alpha: 1.0, scale:(2, 2));
+		sb.DrawImage(GetPickupSprite(), bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, box: (50, 50), scale: (2, 2));
 		int bat = hdw.WeaponStatus[ZRProp_Battery];
 		if (bat >= 0)
 		{
-			sb.DrawImage(AceCore.GetBatteryColor(bat), (0, 40) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, scale: (2.0, 2.0));
+			sb.DrawImage(AceCore.GetBatteryColor(bat), (0, 30) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_TOP, scale: (2.0, 2.0));
 		}
 	}
 
