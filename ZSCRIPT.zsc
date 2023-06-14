@@ -76,12 +76,13 @@ class ZRadarHDHandler : ZRadarMainHandler
 
 		// [Ace] Pick the ones you want to check in each condition below.
 		bool full = mode == Mode_Full;
-		bool movement = mode == Mode_Movement && (other.vel.length() > 0 || (other.pos - other.Prev).length() > 0 || other.master is 'PlayerPawn');
+		//bool movement = mode == Mode_Movement && (other.vel.length() > 0 || (other.pos - other.Prev).length() > 0 || other.master is 'PlayerPawn');
 		bool local = mode == Mode_Local && plr.CheckSight(other);
 
-		if (full || mode == Mode_Movement || local)
+		//if (full || mode == Mode_Movement || local)
+		if (full || local)
 		{
-			if (toggles & 1 << 3 && (other is 'PortableMedikit' || other is 'HDInjectorMaker' && !(other is 'BluePotion')))
+			if (toggles & 1 << 3 && (other is 'PortableMedikit' || other is 'HDInjectorMaker' && !(other is 'HDHealingPotion')))
 			{
 				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Red, drawBox: (4, 4));
 			}
@@ -89,7 +90,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 			{
 				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Blue, drawBox: (4, 4));
 			}
-			if (toggles & 1 << 5 && (other is 'BluePotion' || other is 'SpiritualArmour' || other is 'HDBlursphere' || other is 'BlueSphere' || other is 'BrownSphere' || other is 'GreenSphere' || other is 'SquadSummoner'))
+			if (toggles & 1 << 5 && (other is 'HDHealingPotion' || other is 'ShieldCore' || other is 'HDBlursphere' || other is 'HDSoulSphere' || other is 'HDMegasphere' || other is 'HDInvuln' || other is 'SquadSummoner'))
 			{
 				return RadarBlip.Create(plr, other, "BLPCROSS", RadarBlip.Col_Green, drawBox: (4, 4));
 			}
@@ -184,7 +185,7 @@ class PortableZRadar : HDWeapon
 
 	override void DrawHUDStuff(HDStatusBar sb, HDWeapon hdw, HDPlayerPawn hpl)
 	{
-		vector2 bob = hpl.hudbob * 0.3;
+		vector2 bob = hpl.wepbob * 0.3;
 		bob.y += WeaponStatus[ZRProp_UseOffset];
 		
 		sb.DrawImage(GetPickupSprite(), bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_CENTER, box: (50, 50), scale: (2, 2));
