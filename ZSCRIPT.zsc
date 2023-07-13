@@ -146,9 +146,23 @@ class PortableZRadar : HDWeapon
 	override bool AddSpareWeapon(actor newowner) { return AddSpareWeaponRegular(newowner); }
 	override HDWeapon GetSpareWeapon(actor newowner , bool reverse, bool doselect) { return GetSpareWeaponRegular(newowner, reverse, doselect); }
 	override string, double GetPickupSprite()
+	
 	{
-		return owner && WeaponStatus[ZRProp_Battery] > 0 && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? "ZRDRA0" : "ZRDRB0", 0.3;
+		string IconString = "ZRDRB0";
+		if (WeaponStatus[ZRProp_Battery] > 1)
+		{
+			IconString = "ZRDRA0";
+		}
+		if (WeaponStatus[ZRProp_Battery] == 0)
+		{
+			IconString = "ZRDRB0";
+		}
+		return IconString, 1.0;
 	}
+	
+//	{
+//		return owner && WeaponStatus[ZRProp_Battery] > 0 && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? "ZRDRA0" : "ZRDRB0", 0.2;
+//	}
 	override string GetHelpText()
 	{
 		string BaseString = WEPHELP_RELOAD.."  Reload battery\n"
