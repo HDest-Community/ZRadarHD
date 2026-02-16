@@ -8,10 +8,10 @@ class ZRadarHDHandler : ZRadarMainHandler
 		Super.WorldLoaded(e);
 	}
 
-	override double GetAlpha()
+	override double GetAlpha(int plrNum)
 	{
-		double OriginalAlpha = Super.GetAlpha();
-		let plr = HDPlayerPawn(players[consoleplayer].mo);
+		double OriginalAlpha = Super.GetAlpha(plrNum);
+		let plr = HDPlayerPawn(players[plrNum].mo);
 		if (plr)
 		{
 			let Radar = PortableZRadar(plr.FindInventory('PortableZRadar'));
@@ -23,15 +23,15 @@ class ZRadarHDHandler : ZRadarMainHandler
 		return OriginalAlpha;
 	}
 
-	override double GetDrainMult(int playerIndex)
+	override double GetDrainMult(int plrNum)
 	{
-		double angleLimit = clamp(AngleLimit.GetInt(), 0, 360);
+		double angleLimit = clamp(zradar_anglelimit, 0, 360);
 		if (angleLimit == 0)
 		{
-			angleLimit = players[playerIndex].FOV;
+			angleLimit = players[plrNum].FOV;
 		}
-		double distMult = max(HDCONST_ONEMETRE * 20.0, ScanDistance.GetInt(), OverscanDistance.GetInt() * 0.8) / (HDCONST_ONEMETRE * 20.0);
-		return Super.GetDrainMult(playerIndex) * (angleLimit / 180.0) * distMult;
+		double distMult = max(HDCONST_ONEMETRE * 20.0, zradar_distance, zradar_overdistance * 0.8) / (HDCONST_ONEMETRE * 20.0);
+		return Super.GetDrainMult(plrNum) * (angleLimit / 180.0) * distMult;
 	}
 
 	override bool CheckRadarCondition(PlayerPawn plr)
@@ -67,7 +67,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 		}
 	}
 
-	override RadarBlip TryMakeBlip(int mode, int toggles, PlayerPawn plr, Actor other)
+	override RadarBlip TryMakeBlip(int state, int toggles, PlayerPawn plr, Actor other)
 	{
 		if (!plr || !other)
 		{
@@ -75,11 +75,11 @@ class ZRadarHDHandler : ZRadarMainHandler
 		}
 
 		// [Ace] Pick the ones you want to check in each condition below.
-		bool full = mode == Mode_Full;
-		//bool movement = mode == Mode_Movement && (other.vel.length() > 0 || (other.pos - other.Prev).length() > 0 || other.master is 'PlayerPawn');
-		bool local = mode == Mode_Local && plr.CheckSight(other);
+		bool full = state == State_Full;
+		//bool movement = state == State_Movement && (other.vel.length() > 0 || (other.pos - other.Prev).length() > 0 || other.master is 'PlayerPawn');
+		bool local = state == State_Local && plr.CheckSight(other);
 
-		//if (full || mode == Mode_Movement || local)
+		//if (full || state == State_Movement || local)
 		if (full || local)
 		{
 			if (toggles & 1 << 3 && (other is 'PortableMedikit' || other is 'PortableStimpack' && !(other is 'HDHealingPotion')))
@@ -124,7 +124,7 @@ class ZRadarHDHandler : ZRadarMainHandler
 			}
 		}
 		
-		return Super.TryMakeBlip(mode, toggles, plr, other);
+		return Super.TryMakeBlip(state, toggles, plr, other);
 	}
 }
 
@@ -161,7 +161,7 @@ class PortableZRadar : HDWeapon
 	}
 	
 //	{
-//		return owner && WeaponStatus[ZRProp_Battery] > 0 && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? "ZRDRA0" : "ZRDRB0", 0.2;
+//		return owner && WeaponStatus[ZRProp_Battery] > 0 && Handler.RadarMode[owner.PlayerNumber()] > State_Disabled ? "ZRDRA0" : "ZRDRB0", 0.2;
 //	}
 	override string GetHelpText()
 	{
@@ -186,7 +186,7 @@ class PortableZRadar : HDWeapon
 
 		if (WeaponStatus[ZRProp_Battery] > 0)
 		{
-			double div = owner && Handler.RadarMode[owner.PlayerNumber()] > Mode_Disabled ? min(Handler.GetDrainMult(owner.PlayerNumber()), 0.10) : 0.10;
+			double div = owner && Handler.Data[owner.PlayerNumber()].RadarState > State_Disabled ? min(Handler.GetDrainMult(owner.PlayerNumber()), 0.10) : 0.10;
 			if (++WeaponStatus[ZRProp_DrainTicker] > (35 * 90) / div)
 			{
 				WeaponStatus[ZRProp_Battery]--;
