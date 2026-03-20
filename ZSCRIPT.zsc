@@ -206,7 +206,7 @@ class PortableZRadar : HDWeapon
 		int bat = hdw.WeaponStatus[ZRProp_Battery];
 		if (bat >= 0)
 		{
-			sb.DrawImage(AceCore.GetBatteryColor(bat), (0, 30) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_TOP, scale: (2.0, 2.0));
+			sb.DrawImage(HDCore.GetBatteryIcon(bat), (0, 30) + bob, sb.DI_SCREEN_CENTER | sb.DI_ITEM_TOP, scale: (2.0, 2.0));
 		}
 	}
 
